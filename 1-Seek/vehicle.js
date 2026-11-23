@@ -1,4 +1,6 @@
 class Vehicle {
+  static debug = false;
+
   constructor(x, y) {
     // position du véhicule
     this.pos = createVector(x, y);
@@ -6,17 +8,75 @@ class Vehicle {
     this.vel = createVector(0, 0);
     // accélération du véhicule
     this.acc = createVector(0, 0);
-    // vitesse maximale du véhicule
-    this.maxSpeed = 4;
-    // force maximale appliquée au véhicule
-    this.maxForce = 0.1;
+    // vitesse maximale de base et effective du véhicule
+    this.baseMaxSpeed = 4;
+    this.maxSpeed = this.baseMaxSpeed;
+    // force maximale de base et effective appliquée au véhicule
+    this.baseMaxForce = 0.1;
+    this.maxForce = this.baseMaxForce;
     // rayon du véhicule
     this.r = 16;
+    // rayon du cercle de détection des cibles
+    this.detectionRadius = 150;
+    // indique si le véhicule poursuit actuellement une cible (boost x3)
+    this.isChasing = false;
+    // direction aléatoire de patrouille (renouvelée toutes les 4 s)
+    this.randomDir = p5.Vector.random2D();
+    this.nextDirectionChangeTime = millis() + 4000;
   }
 
-  
-  applyBehaviors(target) {
-    let force = this.seek(target);
+  findClosestTarget(targets) {
+    let closest = null;
+    let closestDistSq = this.detectionRadius * this.detectionRadius;
+
+    for (let i = 0; i < targets.length; i++) {
+      const candidate = targets[i];
+      const dx = candidate.pos.x - this.pos.x;
+      const dy = candidate.pos.y - this.pos.y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq <= closestDistSq) {
+        closestDistSq = distSq;
+        closest = candidate;
+      }
+    }
+
+    return closest;
+  }
+
+  randomPatrol() {
+    const now = millis();
+    if (now >= this.nextDirectionChangeTime) {
+      this.randomDir = p5.Vector.random2D();
+      this.nextDirectionChangeTime = now + 4000;
+    }
+
+    const desiredSpeed = p5.Vector.mult(this.randomDir, this.maxSpeed);
+    const force = p5.Vector.sub(desiredSpeed, this.vel);
+    force.limit(this.maxForce);
+    return force;
+  }
+
+  applyBehaviors(target, targets = [], scenario = "scenario3") {
+    let force;
+    if (scenario === "scenario1") {
+      this.isChasing = false;
+      this.maxSpeed = this.baseMaxSpeed;
+      this.maxForce = this.baseMaxForce;
+      force = this.seek(target);
+    } else {
+      const detectedTarget = this.findClosestTarget(targets);
+      if (detectedTarget) {
+        this.isChasing = true;
+        this.maxSpeed = this.baseMaxSpeed * 3;
+        this.maxForce = this.baseMaxForce * 3;
+        force = this.seek(detectedTarget.pos);
+      } else {
+        this.isChasing = false;
+        this.maxSpeed = this.baseMaxSpeed;
+        this.maxForce = this.baseMaxForce;
+        force = this.randomPatrol();
+      }
+    }
     this.applyForce(force);
   }
 
@@ -103,8 +163,19 @@ class Vehicle {
     
     pop();
 
-    // dessin sous la forme d'une flèche du vecteur vitesse
-    this.drawVelocityVector();
+    if (Vehicle.debug) {
+      this.drawDetectionCircle();
+      this.drawVelocityVector();
+    }
+  }
+
+  drawDetectionCircle() {
+    push();
+    noFill();
+    stroke(this.isChasing ? color(0, 255, 140, 190) : color(0, 220, 255, 140));
+    strokeWeight(1.5);
+    circle(this.pos.x, this.pos.y, this.detectionRadius * 2);
+    pop();
   }
 
   drawVelocityVector() {
