@@ -99,16 +99,6 @@ class Vehicle {
     this.acc.set(0, 0);
   }
 
-  // On dessine le véhicule
-  show() {
-    push();
-    imageMode(CENTER);
-    translate(this.pos.x, this.pos.y);
-    rotate(this.vel.heading());
-    image(miffyImage, 0, 0, this.size, this.size * 1.17);
-    pop();
-  }
-
   drawVector(pos, v) {
     push();
     // Dessin du vecteur depuis pos comme origne
@@ -138,8 +128,6 @@ class Vehicle {
     }
   }
 }
-
-class Miffy extends Vehicle {}
 
 // draw an arrow for a vector at a given base position
 function drawArrow(base, vec, myColor) {

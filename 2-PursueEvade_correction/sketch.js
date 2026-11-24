@@ -5,6 +5,7 @@ let helloKitties = [];
 let bullets = [];
 let doneForBurst = [];
 let settingsBar;
+let soundEngine;
 
 let gameBackground;
 let miffyImage;
@@ -22,6 +23,11 @@ let helloKittySize = 96;
 let miffyCount = 1;
 let helloKittyCount = 10;
 let bulletCooldownMs = 700;
+let wave = 1;
+let score = 0;
+let wavePendingAt = null;
+let waveAnnouncementUntil = 0;
+let volume = 60;
 
 function preload() {
   gameBackground = loadImage('../images/space.jpeg');
@@ -36,6 +42,7 @@ function setup() {
   canvas.position(0, SETTINGS_BAR_HEIGHT);
   settingsBar = createDiv();
   settingsBar.addClass('settings-bar');
+  soundEngine = new SoundEngine();
   createPopulation();
   createParameterControls();
 }
@@ -71,8 +78,8 @@ function createPopulation() {
 
 function createHelloKitty() {
   const kitty = new HelloKitty(random(width), random(height));
-  kitty.maxSpeed = kittySpeed;
-  kitty.maxForce = 0.5;
+  kitty.maxSpeed = kittySpeed * waveSpeedMultiplier();
+  kitty.maxForce = 0.5 * waveForceMultiplier();
   kitty.rayonDetection = evadeDistance;
   kitty.size = helloKittySize;
   kitty.r = helloKittySize / 2;
@@ -87,9 +94,12 @@ function draw() {
   image(gameBackground, 0, 0, height, width);
   pop();
 
+  let chasingCount = 0;
+  let fleeingCount = 0;
   miffies.forEach(miffy => {
     const kitty = closestHelloKitty(miffy, helloKitties);
     if (kitty) {
+      chasingCount++;
       miffy.applyForce(miffy.pursue(kitty));
       if (millis() - miffy.lastShotAt >= bulletCooldownMs) {
         fireBullet(miffy, kitty);
@@ -111,9 +121,13 @@ function draw() {
     const miffy = closestMiffy(kitty, miffies);
     if (miffy) {
       const distance = p5.Vector.dist(miffy.pos, kitty.pos);
-      kitty.maxSpeed = distance < evadeDistance ? kittyEscapeSpeed : kittySpeed;
-      kitty.maxForce = distance < evadeDistance ? 1 : 0.5;
-      if (distance < evadeDistance) kitty.applyForce(kitty.evade(miffy));
+      const isFleeing = distance < evadeDistance;
+      kitty.maxSpeed = (isFleeing ? kittyEscapeSpeed : kittySpeed) * waveSpeedMultiplier();
+      kitty.maxForce = (isFleeing ? 1 : 0.5) * waveForceMultiplier();
+      if (isFleeing) {
+        fleeingCount++;
+        kitty.applyForce(kitty.evade(miffy));
+      }
     }
     kitty.update();
     kitty.show();
@@ -123,9 +137,16 @@ function draw() {
   drawDoneForBurst();
 
   helloKitties = helloKitties.filter(kitty => !kitty.isDead || millis() - kitty.deathTime < 10000);
-  while (helloKitties.filter(kitty => !kitty.isDead).length < helloKittyCount) {
-    helloKitties.push(createHelloKitty());
-  }
+  updateWave();
+  soundEngine.updateMusic({
+    dtMs: deltaTime,
+    targetCount: livingHelloKittyCount(),
+    referenceCount: helloKittyCount,
+    chasingCount,
+    fleeingCount,
+    wave
+  });
+  drawHud();
 }
 
 function createParameterControls() {
@@ -165,6 +186,18 @@ function createParameterControls() {
   makeSlider('Shot delay', 100, 2000, bulletCooldownMs, 50, value => {
     bulletCooldownMs = value;
   });
+  makeSlider('Volume', 0, 100, volume, 1, value => {
+    volume = value;
+    soundEngine.unlock();
+    soundEngine.setVolume(value / 100);
+  });
+
+  const audioToggle = createButton('Audio: ON').parent(settingsBar);
+  audioToggle.addClass('setting-audio');
+  audioToggle.mousePressed(() => {
+    const isEnabled = soundEngine.toggleEnabled();
+    audioToggle.html(`Audio: ${isEnabled ? 'ON' : 'OFF'}`);
+  });
 }
 
 function makeSlider(labelText, minValue, maxValue, initialValue, step, onChange) {
@@ -181,70 +214,135 @@ function makeSlider(labelText, minValue, maxValue, initialValue, step, onChange)
 }
 
 function fireBullet(miffy, kitty) {
-  const direction = p5.Vector.sub(kitty.pos, miffy.pos).setMag(16);
-  bullets.push({
-    pos: miffy.pos.copy(),
-    velocity: direction,
-    life: 120
-  });
+  const distance = p5.Vector.dist(miffy.pos, kitty.pos);
+  const leadFrames = distance / 16;
+  const aimPoint = kitty.pos.copy().add(kitty.vel.copy().mult(leadFrames));
+  const direction = p5.Vector.sub(aimPoint, miffy.pos);
+  bullets.push(new Bullet(miffy.pos.x, miffy.pos.y, direction));
 }
 
 function updateBullets() {
-  bullets = bullets.filter(bullet => bullet.life > 0);
+  bullets = bullets.filter(bullet => !bullet.isDead);
   bullets.forEach(bullet => {
-    bullet.pos.add(bullet.velocity);
-    bullet.life--;
-    noStroke();
-    fill('#ff4db8');
-    circle(bullet.pos.x, bullet.pos.y, 12);
+    bullet.update();
+    bullet.show();
 
-    const hitKitty = helloKitties.find(kitty => !kitty.isDead &&
-      p5.Vector.dist(bullet.pos, kitty.pos) < kitty.r + 6);
+    const hitKitty = helloKitties.find(kitty => {
+      if (kitty.isDead) return false;
+      const dx = bullet.pos.x - kitty.pos.x;
+      const dy = bullet.pos.y - kitty.pos.y;
+      const hitRadius = kitty.r + bullet.r;
+      return dx * dx + dy * dy < hitRadius * hitRadius;
+    });
     if (hitKitty) {
-      hitKitty.isDead = true;
-      hitKitty.deathTime = millis();
-      createDoneForBurst(hitKitty.pos);
-      bullet.life = 0;
+      bullet.isDead = true;
+      if (hitKitty.takeDamage(1)) {
+        hitKitty.isDead = true;
+        hitKitty.deathTime = millis();
+        score++;
+        soundEngine.playTargetDeath(hitKitty.pos.x, width, hitKitty.r);
+        createDoneForBurst(hitKitty.pos);
+      }
     }
   });
+  bullets = bullets.filter(bullet => !bullet.isDead);
 }
 
 function createDoneForBurst(position) {
   for (let i = 0; i < 36; i++) {
     const angle = random(TWO_PI);
     const speed = random(2, 9);
-    doneForBurst.push({
-      x: position.x,
-      y: position.y,
-      vx: cos(angle) * speed,
-      vy: sin(angle) * speed,
-      size: random(18, 42),
-      rotation: random(TWO_PI),
-      spin: random(-0.12, 0.12),
-      life: random(45, 85),
-      maxLife: 85
-    });
+    const particle = new DoneForParticle(
+      position.x,
+      position.y,
+      cos(angle) * speed,
+      sin(angle) * speed,
+      random(18, 42),
+      random(TWO_PI),
+      random(-0.12, 0.12),
+      random(45, 85),
+      85
+    );
+    doneForBurst.push(particle);
   }
 }
 
 function drawDoneForBurst() {
   doneForBurst = doneForBurst.filter(particle => particle.life > 0);
-  imageMode(CENTER);
   doneForBurst.forEach(particle => {
-    particle.x += particle.vx;
-    particle.y += particle.vy;
-    particle.vx *= 0.985;
-    particle.vy = particle.vy * 0.985 + 0.035;
+    particle.update();
     particle.rotation += particle.spin;
-    particle.life--;
-
-    push();
-    translate(particle.x, particle.y);
-    rotate(particle.rotation);
-    tint(255, map(particle.life, 0, particle.maxLife, 0, 255));
-    image(doneForImage, 0, 0, particle.size, particle.size * 1.41);
-    pop();
+    particle.show();
   });
+}
+
+function updateWave() {
+  const livingCount = livingHelloKittyCount();
+  if (livingCount > 0) {
+    wavePendingAt = null;
+    return;
+  }
+
+  if (wavePendingAt === null) {
+    wavePendingAt = millis();
+    waveAnnouncementUntil = wavePendingAt + 1600;
+  } else if (millis() - wavePendingAt >= 1600) {
+    wave++;
+    wavePendingAt = null;
+    createPopulation();
+    soundEngine.playWaveStart(wave);
+    waveAnnouncementUntil = millis() + 1600;
+  }
+}
+
+function livingHelloKittyCount() {
+  return helloKitties.reduce((count, kitty) => count + (kitty.isDead ? 0 : 1), 0);
+}
+
+function waveSpeedMultiplier() {
+  return 1 + (wave - 1) * 0.15;
+}
+
+function waveForceMultiplier() {
+  return 1 + (wave - 1) * 0.1;
+}
+
+function drawHud() {
+  push();
+  const label = `Wave ${wave}  ·  Score ${score}  ·  Hello Kitties ${livingHelloKittyCount()}`;
+  textSize(16);
+  textStyle(BOLD);
+  textAlign(RIGHT, CENTER);
+  const paddingX = 14;
+  const boxHeight = 38;
+  const boxWidth = textWidth(label) + paddingX * 2;
+  const boxX = width - boxWidth - 14;
+  const boxY = 14;
+  fill(12, 15, 35, 205);
+  stroke(255, 255, 255, 120);
+  strokeWeight(1);
+  rect(boxX, boxY, boxWidth, boxHeight, 8);
+  noStroke();
+  fill(255);
+  text(label, boxX + boxWidth - paddingX, boxY + boxHeight / 2);
+  if (wavePendingAt !== null && millis() < waveAnnouncementUntil) {
+    textAlign(CENTER, CENTER);
+    textSize(26);
+    text('Wave clear!', width / 2, height / 2);
+  } else if (millis() < waveAnnouncementUntil) {
+    textAlign(CENTER, CENTER);
+    textSize(26);
+    text(`Wave ${wave}`, width / 2, height / 2);
+  }
+  pop();
+}
+
+function mousePressed() {
+  if (soundEngine && soundEngine.enabled) soundEngine.unlock();
+}
+
+function keyPressed() {
+  if (soundEngine && soundEngine.enabled) soundEngine.unlock();
 }
 
 function closestHelloKitty(miffy, kitties) {

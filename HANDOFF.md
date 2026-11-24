@@ -256,3 +256,24 @@ Avant toute modification de code :
   - Toutes les tâches spécifiées dans `1-Seek/1-Specification.md` (Tâches 1 à 7) sont `[DONE]`. En attente de nouvelles tâches pour `1-Seek` ou passage au prochain sketch.
 - **Points d'attention / bugs connus** :
   - L'audio Web Audio démarre dès la première interaction (clic ou touche) conformément à la politique autoplay des navigateurs.
+
+### Passation #11 — 2026-11-24
+- **Assistant sortant** : Codex
+- **Travail effectué** :
+  - Portage dans `2-PursueEvade_correction` des systèmes ajoutés au sketch `1-Seek` : points de vie, vagues progressives, HUD score/vague et audio Web Audio adaptatif.
+  - Conservation du design demandé : Miffy poursuit et tire sur Hello Kitty, le fond est `images/space.jpeg`, les réglages restent dans la barre supérieure et l'effet de mort utilise plusieurs sprites `done_for.png`.
+  - Chaque Hello Kitty possède 5 à 10 PV; les balles font un point de dégâts. Une vague suivante démarre après l'élimination de toutes les Hello Kitties, avec vitesse et force augmentées respectivement de 15 % et 10 % par vague.
+  - Réutilisation directe de `1-Seek/soundEngine.js` pour les effets de mort et la musique adaptative. `miffy.js`, `bullet.js` et `doneForParticle.js` isolent chacun une sous-classe de `Vehicle`.
+- **Fichiers créés / modifiés** :
+  - `2-PursueEvade_correction/index.html`
+  - `2-PursueEvade_correction/sketch.js`
+  - `2-PursueEvade_correction/style.css`
+  - `2-PursueEvade_correction/vehicle.js`
+  - `2-PursueEvade_correction/miffy.js` (nouveau)
+  - `2-PursueEvade_correction/target.js`
+  - `2-PursueEvade_correction/bullet.js` (nouveau)
+  - `2-PursueEvade_correction/doneForParticle.js` (nouveau)
+  - `README.md`
+- **Points d'attention** :
+  - Le moteur audio partagé est déverrouillé par la première interaction avec la page, conformément aux restrictions d'autoplay du navigateur.
+  - Vérification visuelle à faire dans un navigateur local.

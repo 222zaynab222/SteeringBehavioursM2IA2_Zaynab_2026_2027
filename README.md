@@ -29,7 +29,7 @@ Ensemble d'applications et d'exercices interactifs en **p5.js** mettant en œuvr
 | --- | --- | --- |
 | `1-Seek/` | Comportement de base **Seek** & **Flee** vers une cible | `sketch.js`, `soundEngine.js`, `target.js`, `targetFragment.js`, `test.js`, `vehicle.js` |
 | `2-PursueEvade/` | Comportements **Pursuit** & **Evasion** avec cible mobile | `bouncingBall.js`, `sketch.js`, `target.js`, `vehicle.js` |
-| `2-PursueEvade_correction/` | Correction de **Pursuit** & **Evasion** | `bouncingBall.js`, `sketch.js`, `target.js`, `vehicle.js` |
+| `2-PursueEvade_correction/` | Mini-jeu **Miffy vs Hello Kitty** : projectiles, points de vie, vagues et audio adaptatif | `bullet.js`, `doneForParticle.js`, `miffy.js`, `sketch.js`, `target.js`, `vehicle.js` |
 | `3-Arrival/` | Comportement **Arrival** avec zone de freinage | `sketch.js`, `vehicle.js` |
 | `3-Arrival_correction/` | Correction **Arrival** + démonstrations `Snake` / `SnakeWander` | `sketch.js`, `snake.js`, `snakeWander.js`, `vehicle.js` |
 | `4-Wander/` | Comportement **Wander** avec traînée et sprite | `sketch.js`, `vehicle.js` |
@@ -52,6 +52,7 @@ Puis ouvrir `http://localhost:8000/1-Seek/` (ou le dossier de votre choix) dans 
 ## Journal des évolutions récentes
 
 <!-- AUTO-GENERATED:CHANGELOG:START -->
+- **2026-11-24** : Adaptation des systèmes du commit `1-Seek` au mini-jeu `2-PursueEvade_correction`, en conservant son identité visuelle Miffy / Hello Kitty : points de vie de 5 à 10 et barre de vie, score et vagues progressives (+15 % de vitesse, +10 % de force par vague), audio Web Audio adaptatif réutilisant `1-Seek/soundEngine.js`, impacts létaux avec effet d'explosion `done_for.png`, projectiles et particules implémentés comme sous-classes de `Vehicle` dans des fichiers séparés.
 - **2026-11-23** : Implémentation de la tâche 7 de `1-Seek` : moteur audio natif Web Audio (`SoundEngine`) avec spatialisation stéréo G/D (`StereoPannerNode`), explosion/agonie à la mort d'une cible, pulsation grave périodique s'accélérant quand le nombre de cibles diminue, curseur `Volume` et bouton `Musique / Sons ON/OFF`.
 - **2026-11-23** : Ajout des vagues progressives dans `1-Seek` : lorsque toutes les cibles sont éliminées, recréation automatique du nombre défini par le curseur avec vitesse max (`+15 %`/vague) et accélération (`+10 %`/vague) renforcées, et affichage du numéro de vague dans le HUD.
 - **2026-11-23** : Ajout de l'éclatement en 8 parts de camembert (`TargetFragment extends Vehicle`, animation 0,3 s) dans `1-Seek` : dans le scénario 3, une cible touchée éclate et meurt définitivement sans réapparaître.
