@@ -29,8 +29,8 @@ Ensemble d'applications et d'exercices interactifs en **p5.js** mettant en œuvr
 | --- | --- | --- |
 | `1-Seek/` | Comportement de base **Seek** & **Flee** vers une cible | `sketch.js`, `soundEngine.js`, `target.js`, `targetFragment.js`, `test.js`, `vehicle.js` |
 | `2-PursueEvade/` | Comportements **Pursuit** & **Evasion** avec cible mobile | `bouncingBall.js`, `sketch.js`, `target.js`, `vehicle.js` |
-| `2-PursueEvade_correction/` | Mini-jeu **Miffy vs Hello Kitty** : projectiles, points de vie, vagues et audio adaptatif | `bullet.js`, `doneForParticle.js`, `miffy.js`, `sketch.js`, `target.js`, `vehicle.js` |
-| `3-Arrival/` | Comportement **Arrival** avec zone de freinage | `sketch.js`, `vehicle.js` |
+| `2-PursueEvade_correction/` | Mini-jeu **Miffy vs Hello Kitty** : Miffy contrôlée à la souris, une manche, projectiles et audio adaptatif | `bullet.js`, `doneForParticle.js`, `miffy.js`, `sketch.js`, `target.js`, `vehicle.js` |
+| `3-Arrival/` | Comportement **Arrival** avec réglages interactifs, freinage et mode debug | `sketch.js`, `target.js`, `vehicle.js` |
 | `3-Arrival_correction/` | Correction **Arrival** + démonstrations `Snake` / `SnakeWander` | `sketch.js`, `snake.js`, `snakeWander.js`, `vehicle.js` |
 | `4-Wander/` | Comportement **Wander** avec traînée et sprite | `sketch.js`, `vehicle.js` |
 <!-- AUTO-GENERATED:SKETCHES:END -->
@@ -52,6 +52,11 @@ Puis ouvrir `http://localhost:8000/1-Seek/` (ou le dossier de votre choix) dans 
 ## Journal des évolutions récentes
 
 <!-- AUTO-GENERATED:CHANGELOG:START -->
+- **2026-11-24** : Ajout d'un écran d'accueil avec bouton Start Game et d'une fin de partie avec Start Again dans `2-PursueEvade_correction`. Miffy suit la souris; le compteur de Hello Kitties est retiré du HUD et la manche se termine après l'élimination de toutes les cibles choisies, sans vague automatique.
+- **2026-11-24** : Refonte des réglages de `2-PursueEvade_correction` : portraits Miffy en haut à gauche et Hello Kitty en haut à droite ouvrant leurs réglages au survol ou au clic; comportement, délai de tir et audio regroupés au centre au-dessus de l'ordinateur. Taille de l'ordinateur ajustée pour réserver la zone des réglages.
+- **2026-11-24** : Intégration de `images/pc_screen.png` comme cadre plein écran de `2-PursueEvade_correction` : le canvas est redimensionné et positionné sur la zone d'écran du vieil ordinateur, la composition carrée reste centrée au redimensionnement, et les réglages sont repliés derrière un bouton dans l'écran.
+- **2026-11-24** : Intégration des 4 steering behaviors au jeu Miffy / Hello Kitty : choix `Seek`, `Pursue`, `Arrival`, `Wander` ou mode hybride par défaut combinant les quatre forces, avec réglage du rayon d'arrivée et visualisation du wander en debug.
+- **2026-11-24** : Mise à jour de `3-Arrival` avec les améliorations de contrôle de `1-Seek`, en conservant le comportement Arrival : réglages en barre supérieure pour le nombre de véhicules, la vitesse, la force et le rayon de freinage, debug synchronisé avec la touche `D`, vecteur vitesse visible en debug, redimensionnement du canvas et séparation de `Target` dans son propre fichier.
 - **2026-11-24** : Adaptation des systèmes du commit `1-Seek` au mini-jeu `2-PursueEvade_correction`, en conservant son identité visuelle Miffy / Hello Kitty : points de vie de 5 à 10 et barre de vie, score et vagues progressives (+15 % de vitesse, +10 % de force par vague), audio Web Audio adaptatif réutilisant `1-Seek/soundEngine.js`, impacts létaux avec effet d'explosion `done_for.png`, projectiles et particules implémentés comme sous-classes de `Vehicle` dans des fichiers séparés.
 - **2026-11-23** : Implémentation de la tâche 7 de `1-Seek` : moteur audio natif Web Audio (`SoundEngine`) avec spatialisation stéréo G/D (`StereoPannerNode`), explosion/agonie à la mort d'une cible, pulsation grave périodique s'accélérant quand le nombre de cibles diminue, curseur `Volume` et bouton `Musique / Sons ON/OFF`.
 - **2026-11-23** : Ajout des vagues progressives dans `1-Seek` : lorsque toutes les cibles sont éliminées, recréation automatique du nombre défini par le curseur avec vitesse max (`+15 %`/vague) et accélération (`+10 %`/vague) renforcées, et affichage du numéro de vague dans le HUD.

@@ -277,3 +277,76 @@ Avant toute modification de code :
 - **Points d'attention** :
   - Le moteur audio partagé est déverrouillé par la première interaction avec la page, conformément aux restrictions d'autoplay du navigateur.
   - Vérification visuelle à faire dans un navigateur local.
+
+### Passation #12 — 2026-11-24
+- **Assistant sortant** : Codex
+- **Travail effectué** :
+  - Mise à jour de `3-Arrival` en reprenant les contrôles interactifs et le mode debug de `1-Seek`, tout en gardant le suivi de la souris avec arrivée.
+  - Ajout des réglages du nombre de véhicules (`1..100`), de la vitesse max (`0..20`), de la force max (`0..1`) et du rayon de freinage (`0..400`) dans une barre supérieure.
+  - Synchronisation de la case Debug avec `D`/`d`, affichage du vecteur vitesse en mode debug, adaptation du canvas au redimensionnement et correction de l'affichage du rayon de freinage.
+  - Déplacement de `Target` dans `3-Arrival/target.js` pour respecter la règle d'une classe par fichier.
+- **Fichiers créés / modifiés** :
+  - `3-Arrival/sketch.js`
+  - `3-Arrival/style.css`
+  - `3-Arrival/vehicle.js`
+  - `3-Arrival/target.js` (nouveau)
+  - `3-Arrival/index.html`
+  - `README.md`
+- **Points d'attention** :
+  - Vérification visuelle à faire dans un navigateur local.
+
+### Passation #13 — 2026-11-24
+- **Assistant sortant** : Codex
+- **Travail effectué** :
+  - Intégration des quatre comportements vus dans les sketches 1 à 4 à Miffy : `seek`, `pursue`, `arrive` et `wander`.
+  - Ajout du sélecteur `Miffy behavior` dans la barre supérieure; le mode initial `All behaviors` combine les quatre forces (Seek 20 %, Pursue 35 %, Arrival 30 %, Wander 15 %), puis borne le résultat à `maxForce`.
+  - Ajout de `Vehicle.arrive()` et `Vehicle.wander()`. Le rayon d'arrivée est réglable et le cercle/point Wander apparaît en mode debug.
+  - Les tirs de Miffy restent indépendants du mode de déplacement et continuent à viser la Hello Kitty la plus proche.
+- **Fichiers modifiés** :
+  - `2-PursueEvade_correction/sketch.js`
+  - `2-PursueEvade_correction/vehicle.js`
+  - `2-PursueEvade_correction/style.css`
+  - `README.md`
+- **Vérification** :
+  - Vérification visuelle dans un navigateur local à effectuer.
+
+### Passation #14 — 2026-11-24
+- **Assistant sortant** : Codex
+- **Travail effectué** :
+  - Ajout de `images/pc_screen.png` en fond de page pour encadrer le jeu dans l'écran de l'ancien ordinateur.
+  - Calcul du rectangle d'écran à partir de la taille d'affichage carrée (`100vmin`) et redimensionnement/repositionnement du canvas lors du redimensionnement de la fenêtre.
+  - Remplacement de la barre de réglages permanente par un bouton repliable dans la zone de l'écran; les contrôles restent horizontalement défilables lorsqu'ils sont ouverts.
+  - Conservation de `background.jpeg` à l'intérieur du canvas du jeu.
+- **Fichiers modifiés** :
+  - `2-PursueEvade_correction/sketch.js`
+  - `2-PursueEvade_correction/style.css`
+  - `README.md`
+- **Points d'attention** :
+  - Les proportions d'écran sont initialisées à partir de l'image 500 × 500; un ajustement visuel dans le navigateur peut affiner l'alignement.
+
+### Passation #15 — 2026-11-24
+- **Assistant sortant** : Codex
+- **Travail effectué** :
+  - Déplacement des réglages du jeu hors du moniteur : image Miffy en haut à gauche, image Hello Kitty en haut à droite, panneau général centré au-dessus de l'ordinateur.
+  - Survol ou clic d'un portrait ouvre son panneau avec les réglages correspondants; clic permet aussi de garder le panneau ouvert sur écran tactile.
+  - Réservation d'une bande supérieure pour les réglages et centrage/redimensionnement du visuel `pc_screen.png` dans l'espace restant.
+  - Répartition des curseurs : nombre/taille/vitesse/force/Arrival pour Miffy; nombre/taille/vitesse/fuite/distance d'évasion pour Hello Kitty; comportement, cadence de tir et audio au centre.
+- **Fichiers modifiés** :
+  - `2-PursueEvade_correction/sketch.js`
+  - `2-PursueEvade_correction/style.css`
+  - `README.md`
+- **Points d'attention** :
+  - Il reste à valider visuellement les popovers et la mise à l'échelle sur plusieurs tailles d'écran.
+
+### Passation #16 — 2026-11-24
+- **Assistant sortant** : Codex
+- **Travail effectué** :
+  - Retrait du nombre de Hello Kitties dans le HUD; seul le score et le comportement sélectionné restent affichés.
+  - Ajout d'un écran d'accueil avec bouton **START GAME** et d'un écran **GAME OVER** avec **START AGAIN**.
+  - Miffy suit maintenant la souris avec les comportements Seek, Pursue, Arrival, Wander ou leur combinaison; ses tirs continuent de viser les Hello Kitties.
+  - La sélection du nombre de Miffies et de Hello Kitties est appliquée au lancement. Après élimination de toutes les Hello Kitties, la partie s'arrête sans créer de vague supplémentaire; **START AGAIN** relance la même configuration.
+- **Fichiers modifiés** :
+  - `2-PursueEvade_correction/sketch.js`
+  - `README.md`
+- **Vérification** :
+  - Vérification visuelle dans le navigateur local à effectuer.

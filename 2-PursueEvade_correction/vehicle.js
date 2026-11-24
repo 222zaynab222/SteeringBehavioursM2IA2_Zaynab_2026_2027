@@ -12,6 +12,10 @@ class Vehicle {
     this.maxForce = 0.25;
     // rayon du véhicule
     this.r = 16;
+    this.distanceCercle = 140;
+    this.wanderRadius = 65;
+    this.wanderTheta = 0;
+    this.displaceRange = 0.35;
   }
 
   /*
@@ -31,6 +35,48 @@ class Vehicle {
     force.limit(this.maxForce);
     // on applique la force au véhicule
     return force;
+  }
+
+  arrive(target, slowingRadius = 140) {
+    const desired = p5.Vector.sub(target, this.pos);
+    const distance = desired.mag();
+    let desiredSpeed = this.maxSpeed;
+    if (slowingRadius > 0 && distance < slowingRadius) {
+      desiredSpeed = map(distance, 0, slowingRadius, 0, this.maxSpeed);
+    }
+    desired.setMag(desiredSpeed);
+    const force = p5.Vector.sub(desired, this.vel);
+    force.limit(this.maxForce);
+    return force;
+  }
+
+  wander() {
+    let forward = this.vel.copy();
+    if (forward.magSq() === 0) forward = p5.Vector.fromAngle(random(TWO_PI));
+    forward.setMag(this.distanceCercle);
+    const circleCenter = p5.Vector.add(this.pos, forward);
+
+    this.wanderTheta += random(-this.displaceRange, this.displaceRange);
+    const theta = this.wanderTheta + this.vel.heading();
+    const wanderPoint = createVector(
+      circleCenter.x + this.wanderRadius * cos(theta),
+      circleCenter.y + this.wanderRadius * sin(theta)
+    );
+
+    if (Vehicle.debug) {
+      push();
+      noFill();
+      stroke(255, 180);
+      circle(circleCenter.x, circleCenter.y, this.wanderRadius * 2);
+      stroke('#ffe66d');
+      line(this.pos.x, this.pos.y, wanderPoint.x, wanderPoint.y);
+      fill('#ffe66d');
+      noStroke();
+      circle(wanderPoint.x, wanderPoint.y, 8);
+      pop();
+    }
+
+    return this.seek(wanderPoint);
   }
 
   // inverse de seek !

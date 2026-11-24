@@ -1,65 +1,110 @@
 let target;
 let vehicles = [];
+let settingsBar;
+let debugCheckbox;
+let vehicleCount = 1;
+let maxVehicleSpeed = 4;
+let maxVehicleForce = 0.2;
+let brakingRadius = 100;
+let font;
 
-
-// Appelée avant de démarrer l'animation
 function preload() {
-  // en général on charge des images, des fontes de caractères etc.
   font = loadFont('./assets/inconsolata.otf');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  // La cible, ce sera la position de la souris
   target = createVector(random(width), random(height));
-
-  // on cree des vehicules, autant que de points
-  creerVehicules(1);
+  settingsBar = createDiv();
+  settingsBar.addClass('arrival-settings');
+  createControls();
+  setVehicleCount(vehicleCount);
 }
 
-function creerVehicules(n) {
-  for (let i = 0; i < n; i++) {
-    let v = new Vehicle(random(width), random(height));
-    vehicles.push(v);
+function createControls() {
+  makeSlider('Vehicles', 1, 100, vehicleCount, 1, value => {
+    vehicleCount = value;
+    setVehicleCount(value);
+  });
+  makeSlider('Max speed', 0, 20, maxVehicleSpeed, 0.1, value => {
+    maxVehicleSpeed = value;
+    applyVehicleSettings();
+  });
+  makeSlider('Max force', 0, 1, maxVehicleForce, 0.01, value => {
+    maxVehicleForce = value;
+    applyVehicleSettings();
+  });
+  makeSlider('Braking radius', 0, 400, brakingRadius, 5, value => {
+    brakingRadius = value;
+    applyVehicleSettings();
+  });
+
+  const debugLabel = createDiv('Debug').parent(settingsBar);
+  debugLabel.addClass('arrival-debug-label');
+  debugCheckbox = createCheckbox('', false).parent(settingsBar);
+  debugCheckbox.addClass('arrival-debug');
+  debugCheckbox.changed(() => {
+    Vehicle.debug = debugCheckbox.checked();
+  });
+}
+
+function makeSlider(labelText, minValue, maxValue, initialValue, step, onChange) {
+  const group = createDiv().parent(settingsBar);
+  group.addClass('arrival-setting');
+  const label = createDiv(`${labelText}: ${initialValue}`).parent(group);
+  label.addClass('arrival-setting__label');
+  const slider = createSlider(minValue, maxValue, initialValue, step).parent(group);
+  slider.addClass('arrival-setting__slider');
+  slider.input(() => {
+    const value = Number(slider.value());
+    label.html(`${labelText}: ${value}`);
+    onChange(value);
+  });
+}
+
+function setVehicleCount(count) {
+  while (vehicles.length < count) {
+    vehicles.push(new Vehicle(random(width), random(height)));
   }
+  vehicles.length = count;
+  applyVehicleSettings();
 }
 
-// appelée 60 fois par seconde
+function applyVehicleSettings() {
+  vehicles.forEach(vehicle => {
+    vehicle.maxSpeed = maxVehicleSpeed;
+    vehicle.maxForce = maxVehicleForce;
+    vehicle.rayonZoneDeFreinage = brakingRadius;
+  });
+}
+
 function draw() {
-  // couleur pour effacer l'écran
   background(0);
-  // pour effet psychedelique
-  //background(0, 0, 0, 10);
+  target.set(mouseX, mouseY);
 
-
-  target.x = mouseX;
-  target.y = mouseY;
-
-  // dessin de la cible à la position de la souris
   push();
   fill(255, 0, 0);
   noStroke();
-  ellipse(target.x, target.y, 32);
+  circle(target.x, target.y, 32);
   pop();
 
-  // si on a affaire au premier véhicule
-  // alors il suit la souris (target)
-  let steeringForce;
-  // le premier véhicule suit la souris avec arrivée
-  vehicles.forEach((vehicle, index) => {
-  
-    // le premier véhicule suit la souris avec arrivée
-    steeringForce = vehicle.arrive(target, 0);
-       vehicle.applyForce(steeringForce);
-       vehicle.update();
-      vehicle.show();
-    })
-
+  vehicles.forEach(vehicle => {
+    vehicle.applyForce(vehicle.arrive(target, 0));
+    vehicle.update();
+    vehicle.show();
+  });
 }
 
-function keyPressed() {
-  if (key === 'd') {
+function keyPressed(event) {
+  if (event && event.target && event.target.matches('input, select, textarea, button')) {
+    return;
+  }
+  if (key === 'd' || key === 'D') {
     Vehicle.debug = !Vehicle.debug;
-  } 
+    debugCheckbox.checked(Vehicle.debug);
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }

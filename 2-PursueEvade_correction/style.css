@@ -7,57 +7,259 @@ body {
   font-family: Arial, sans-serif;
 }
 
+body {
+  background-color: #afa3b2;
+  background-image: url('../images/pc_screen.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100vmin 100vmin;
+}
+
 canvas {
+  position: fixed;
+  z-index: 1;
   display: block;
 }
 
-.settings-bar {
+.settings-header {
   position: fixed;
-  z-index: 10;
-  top: 0;
+  z-index: 20;
+  top: 8px;
   left: 0;
   box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(420px, 2.2fr) minmax(190px, 1fr);
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+  padding: 0 12px;
+}
+
+.character-card {
+  position: relative;
+  min-width: 0;
+}
+
+.character-card--miffy {
+  grid-column: 1;
+}
+
+.character-card--kitty {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.character-card__trigger {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  height: 112px;
+  gap: 9px;
+  min-width: 176px;
+  padding: 6px 12px 6px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 18px;
+  color: #352746;
+  background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(250,231,250,.95));
+  box-shadow: 0 5px 18px rgba(47, 27, 54, 0.2);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.character-card--kitty .character-card__trigger {
+  background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(255,230,239,.96));
+}
+
+.character-card__image {
+  display: block;
+  width: 54px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.character-card__name {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.character-card__panel {
+  position: absolute;
+  top: 72px;
+  left: 0;
+  display: none;
+  box-sizing: border-box;
+  width: 270px;
+  max-height: min(68vh, 440px);
+  padding: 12px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 32px rgba(35, 17, 45, 0.24);
+}
+
+.character-card--kitty .character-card__panel {
+  right: 0;
+  left: auto;
+}
+
+.character-card:hover .character-card__panel,
+.character-card:focus-within .character-card__panel,
+.character-card--open .character-card__panel {
+  display: grid;
+  gap: 9px;
+}
+
+.general-settings {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 74px;
   padding: 8px 12px;
   overflow-x: auto;
-  overflow-y: hidden;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 3px 12px rgba(25, 12, 50, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 5px 18px rgba(47, 27, 54, 0.18);
+  backdrop-filter: blur(8px);
 }
 
-.setting-control {
-  display: flex;
-  flex: 0 0 122px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  height: 90px;
+.general-settings__title {
+  color: #5d4865;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
+.general-setting {
+  display: grid;
+  flex: 0 0 124px;
+  gap: 5px;
+}
+
+.general-settings > .setting-control {
+  flex: 0 0 132px;
+}
+
+.general-setting__label,
 .setting-label {
-  color: #302244;
-  font-size: 11px;
+  color: #392b47;
+  font-size: 10px;
   font-weight: 700;
   white-space: nowrap;
 }
 
+.setting-control {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.character-card__panel .setting-control {
+  grid-template-columns: minmax(90px, 0.9fr) minmax(120px, 1.1fr);
+}
+
 .setting-slider {
-  width: 112px;
+  width: 100%;
+  min-width: 0;
   margin: 0;
+  accent-color: #c04484;
+}
+
+.setting-select {
+  width: 100%;
+  min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid #d8bfd4;
+  border-radius: 8px;
+  color: #392b47;
+  background: #fff;
+  font-size: 11px;
 }
 
 .setting-audio {
   flex: 0 0 auto;
   padding: 8px 12px;
-  border: 1px solid #c7b7d9;
-  border-radius: 8px;
-  color: #302244;
-  background: #f5edff;
+  border: 1px solid #d8bfd4;
+  border-radius: 10px;
+  color: #392b47;
+  background: #fae7f3;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .settings-header {
+    grid-template-columns: minmax(78px, 0.6fr) minmax(250px, 2fr) minmax(78px, 0.6fr);
+    gap: 6px;
+    padding: 0 7px;
+  }
+
+  .character-card__trigger {
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 66px;
+    padding: 4px;
+  }
+
+  .character-card__image {
+    width: 42px;
+    height: 43px;
+  }
+
+  .character-card__name {
+    font-size: 9px;
+  }
+
+  .general-settings {
+    gap: 7px;
+    min-height: 76px;
+    padding: 6px;
+    overflow-x: auto;
+  }
+
+  .general-settings__title {
+    display: none;
+  }
+
+  .character-card__panel {
+    width: min(270px, calc(100vw - 20px));
+  }
+}
+
+@media (max-width: 600px) {
+  .settings-header {
+    grid-template-columns: 54px minmax(0, 1fr) 54px;
+    gap: 4px;
+    padding: 0 4px;
+  }
+
+  .character-card__trigger {
+    min-width: 50px;
+  }
+
+  .character-card__image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .general-settings {
+    gap: 6px;
+    padding: 5px;
+  }
+
+  .general-setting,
+  .general-settings > .setting-control {
+    flex-basis: 112px;
+  }
 }

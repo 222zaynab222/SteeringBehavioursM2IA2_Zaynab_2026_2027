@@ -204,7 +204,7 @@ class Vehicle {
         push();
         stroke(255, 255, 255);
         noFill();
-        circle(target.x, target.y, this.rayonZoneDeFreinage);
+        circle(target.x, target.y, this.rayonZoneDeFreinage * 2);
         pop();
       }
 
@@ -244,19 +244,25 @@ class Vehicle {
   }
 
   show() {
-    
+    push();
     stroke(255);
     strokeWeight(2);
     fill(255);
-    stroke(0);
-    strokeWeight(2);
-    push();
     translate(this.pos.x, this.pos.y);
     if(this.vel.mag() > 0.2)
       rotate(this.vel.heading());
 
     triangle(-this.r, -this.r / 2, -this.r, this.r / 2, this.r, 0);
     pop();
+
+    if (Vehicle.debug) {
+      push();
+      stroke('#ff4d4d');
+      strokeWeight(2);
+      line(this.pos.x, this.pos.y,
+        this.pos.x + this.vel.x * 10, this.pos.y + this.vel.y * 10);
+      pop();
+    }
     /*
    push();
    // on dessine le vehicule comme un cercle
@@ -280,23 +286,5 @@ class Vehicle {
     } else if (this.pos.y < -this.r) {
       this.pos.y = height + this.r;
     }
-  }
-}
-
-class Target extends Vehicle {
-  constructor(x, y) {
-    super(x, y);
-    this.vel = p5.Vector.random2D();
-    this.vel.mult(5);
-  }
-
-  show() {
-    stroke(255);
-    strokeWeight(2);
-    fill("#F063A4");
-    push();
-    translate(this.pos.x, this.pos.y);
-    circle(0, 0, this.r * 2);
-    pop();
   }
 }
