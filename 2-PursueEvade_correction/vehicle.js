@@ -42,40 +42,10 @@ class Vehicle {
      cette methode renvoie la force à appliquer au véhicule
   */
   pursue(target) {
-
-    // On dessine le vecteur vitesse de la target
-    this.drawVector(target.pos, target.vel.copy().mult(10));
-
-    // TODO
-    // 1 - calcul de la position future de la cible
-    // on fait une copie de la vitesse de la target
-    // (pour ne pas modifier la vitesse de la target)
     let targetAhead = target.vel.copy();
-
-    // et on le multiplie par 10 (10 frames)
-    // 2 - prediction dans 10 frames = 10 fois la longueur du vecteur
-    // (on multiplie le vecteur vitesse par 10)
-    // TODO
     targetAhead.mult(20);
-
-    // 3 - on positionne  la target au bout de ce vecteur
-    // (on ajoute ce vecteur à la position de la target)
-    // TODO
     targetAhead.add(target.pos);
-
-    // 4 -dessin du point devant la target
-    fill("green");
-    circle(targetAhead.x, targetAhead.y, 16);
-
-    // 5 - dessin d'un cercle vert de rayon 16 pour voir ce point
-    // on dessine le point devant le véhicule
-    
-
-    // 6 - appel à seek avec ce point comme cible 
-    let force = this.seek(targetAhead);
-
-    // n'oubliez pas, on renvoie la force à appliquer au véhicule !
-    return force;
+    return this.seek(targetAhead);
   }
 
   /* inverse de pursue
@@ -131,30 +101,12 @@ class Vehicle {
 
   // On dessine le véhicule
   show() {
-    // formes fil de fer en blanc
-    stroke(255);
-    // épaisseur du trait = 2
-    strokeWeight(2);
-
-    // formes pleines en blanc
-    fill(255);
-
-    // sauvegarde du contexte graphique (couleur pleine, fil de fer, épaisseur du trait, 
-    // position et rotation du repère de référence)
     push();
-    // on déplace le repère de référence.
+    imageMode(CENTER);
     translate(this.pos.x, this.pos.y);
-    // et on le tourne. heading() renvoie l'angle du vecteur vitesse (c'est l'angle du véhicule)
     rotate(this.vel.heading());
-
-    // Dessin d'un véhicule sous la forme d'un triangle. Comme s'il était droit, avec le 0, 0 en haut à gauche
-    triangle(-this.r, -this.r / 2, -this.r, this.r / 2, this.r, 0);
-    // Que fait cette ligne ?
-    //this.edges();
-
-    // draw velocity vector
+    image(miffyImage, 0, 0, this.size, this.size * 1.17);
     pop();
-    this.drawVector(this.pos, this.vel.copy().mult(10));
   }
 
   drawVector(pos, v) {
@@ -186,6 +138,8 @@ class Vehicle {
     }
   }
 }
+
+class Miffy extends Vehicle {}
 
 // draw an arrow for a vector at a given base position
 function drawArrow(base, vec, myColor) {
